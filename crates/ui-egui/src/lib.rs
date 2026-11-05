@@ -9,10 +9,19 @@
 #![recursion_limit = "256"]
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
-/// PhotoCraft as craft-update knows it, with its 128 px icon and accent colour: the update
+/// TSPhoto as craft-update knows it, with its 128 px icon and accent colour: the update
 /// prompt shows both, and an AppImage's menu entry gets the icon.
+///
+/// Updates come from Tech Services SDI's own releases (`tsdevelopersdi/TSPhoto`), never from the
+/// upstream repository: assets are `tsphoto-<version>-<os>-<arch>.<ext>` plus `SHA256SUMS.txt`, as
+/// `packaging/windows/package.ps1` builds them. No former ids or names, so an upstream install on
+/// the same machine is never taken for this app.
 #[cfg(not(target_arch = "wasm32"))]
 pub const UPDATE_APP: craft_update::app::App = craft_update::app::App {
+    id: "tsphoto",
+    repo: "tsdevelopersdi/TSPhoto",
+    former_ids: &[],
+    former_names: &[],
     name: "TSPhoto",
     developer: "Solusi Daya Indonesia",
     icon_png: Some(include_bytes!("../../../assets/app-icon/hicolor/128x128/apps/ai.storyteller.photocraft.png")),
@@ -907,3 +916,15 @@ mod saved_path_edit_tests;
 
 #[cfg(test)]
 mod pen_path_ownership_tests;
+/// Updates come only from Tech Services SDI's repository, under this app's own asset names, so an
+/// upstream merge can't quietly point users back at the upstream releases.
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod ts_update_source {
+    #[test]
+    fn updates_come_from_the_ts_repository() {
+        let app = &super::UPDATE_APP;
+        assert_eq!(app.repo, "tsdevelopersdi/TSPhoto");
+        assert_eq!(app.id, "tsphoto");
+        assert!(app.former_ids.is_empty() && app.former_names.is_empty());
+    }
+}

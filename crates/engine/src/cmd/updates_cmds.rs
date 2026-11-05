@@ -10,7 +10,8 @@ use serde_json::{Value, json};
 use crate::commands::{CommandSpec, always};
 use crate::{EngineError, Result, Session};
 
-pub const RELEASES: &str = "https://github.com/storytold/photocraft/releases";
+/// TSPhoto's releases (Tech Services SDI), the repository `UPDATE_APP` in ui-egui names.
+pub const RELEASES: &str = "https://github.com/tsdevelopersdi/TSPhoto/releases";
 pub type CheckResult = std::result::Result<Option<Release>, String>;
 /// Starts background work and returns immediately. No document or personal data is sent.
 pub type CheckFn = Box<dyn FnMut() -> std::result::Result<Receiver<CheckResult>, String> + Send>;
