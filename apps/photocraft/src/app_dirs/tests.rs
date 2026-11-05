@@ -37,11 +37,11 @@ fn no_marker_uses_the_platform_dir() {
     assert!(!exe.join(PORTABLE_DATA_DIR).exists(), "no portable folder without a marker");
     // The convention per platform.
     if cfg!(target_os = "macos") {
-        assert_eq!(dir, root.join("home/Library/Application Support/Photocraft"));
+        assert_eq!(dir, root.join("home/Library/Application Support/TSPhoto"));
     } else if cfg!(windows) {
-        assert_eq!(dir, root.join("appdata").join("Photocraft"));
+        assert_eq!(dir, root.join("appdata").join("TSPhoto"));
     } else {
-        assert_eq!(dir, root.join("home/.config/photocraft"));
+        assert_eq!(dir, root.join("home/.config/tsphoto"));
     }
     let _ = std::fs::remove_dir_all(&root);
 }
@@ -116,7 +116,7 @@ fn override_wins_over_portable() {
 #[test]
 fn autosaves_stay_out_of_the_roaming_profile() {
     let root = temp("recovery-local");
-    let settings = root.join("appdata").join("Photocraft");
+    let settings = root.join("appdata").join("TSPhoto");
     let local = root.join("local");
     let env = env_of(&[("LOCALAPPDATA", &local)]);
     let platform = DataDir { dir: Some(settings.clone()), mode: Mode::Platform, warning: None };

@@ -19,9 +19,9 @@ use photocraft_codecs::{JpegFormat, TiffCompression};
 use photocraft_io::{DdsCompression, DpxBits, TgaBits};
 use serde_json::Value;
 
-/// photocraft-cli: headless PhotoCraft
+/// tsphoto-cli: headless TSPhoto
 #[derive(Parser)]
-#[command(name = "photocraft-cli", version = photocraft_engine::build_info::long_version_static(), arg_required_else_help = true)]
+#[command(name = "tsphoto-cli", version = photocraft_engine::build_info::long_version_static(), arg_required_else_help = true)]
 pub(crate) struct Cli {
     #[command(subcommand)]
     pub(crate) command: Command,
@@ -238,16 +238,16 @@ pub(crate) struct CommandsArgs {
     pub(crate) filter: Option<String>,
 }
 
-/// Run the MCP server on stdio (headless engine, or bridge to a running `photocraft --control <port>`)
+/// Run the MCP server on stdio (headless engine, or bridge to a running `tsphoto --control <port>`)
 ///
 /// Headless: each automation root grants that direction of file access; an omitted root denies it.
 /// Prefer absolute root paths in MCP client configurations. Bridge: set the roots on the desktop
-/// app; root flags are refused. The token flags require --bridge (or PHOTOCRAFT_CONTROL_PORT).
+/// app; root flags are refused. The token flags require --bridge (or TSPHOTO_CONTROL_PORT).
 #[derive(Args)]
 pub(crate) struct McpArgs {
-    /// Bridge to the PhotoCraft app listening here instead of a headless engine; a bare port means
+    /// Bridge to the TSPhoto app listening here instead of a headless engine; a bare port means
     /// 127.0.0.1:<PORT>
-    #[arg(long, value_name = "127.0.0.1:PORT", env = "PHOTOCRAFT_CONTROL_PORT", value_parser = bridge)]
+    #[arg(long, value_name = "127.0.0.1:PORT", env = "TSPHOTO_CONTROL_PORT", value_parser = bridge)]
     pub(crate) bridge: Option<Bridge>,
     /// `--bridge` came from PHOTOCRAFT_CONTROL_PORT, set by [`parse`].
     #[arg(skip)]
@@ -264,11 +264,11 @@ pub(crate) struct McpArgs {
 /// jobs.list/cancel, engine.commands,
 /// doc.open/new/place/save/exportLayers/exportDataSets/importDataSets/inspect/render/select/close,
 /// session.list, batch, methods (docs/control-protocol.md#headless-server). The token flags require
-/// --port (or PHOTOCRAFT_CONTROL_PORT); stdio needs no control token.
+/// --port (or TSPHOTO_CONTROL_PORT); stdio needs no control token.
 #[derive(Args)]
 pub(crate) struct ServeArgs {
     /// Listen on 127.0.0.1:<PORT> instead of stdio
-    #[arg(long, value_name = "PORT", env = "PHOTOCRAFT_CONTROL_PORT", value_parser = control_port)]
+    #[arg(long, value_name = "PORT", env = "TSPHOTO_CONTROL_PORT", value_parser = control_port)]
     pub(crate) port: Option<u16>,
     /// `--port` came from PHOTOCRAFT_CONTROL_PORT, set by [`parse`].
     #[arg(skip)]
@@ -305,7 +305,7 @@ enum ValueError {
 enum ServerOptionError {
     /// PHOTOCRAFT_CONTROL_PORT holds a port, as for the desktop app's --control: only the flag
     /// takes host:port.
-    #[error("invalid value '{0}' for 'PHOTOCRAFT_CONTROL_PORT': {bridge}", bridge = ValueError::Bridge)]
+    #[error("invalid value '{0}' for 'TSPHOTO_CONTROL_PORT': {bridge}", bridge = ValueError::Bridge)]
     BridgeVar(String),
     /// With --bridge the roots are the desktop process's to set: accepting them here promises
     /// authority the bridge can't give (#8035).
@@ -414,10 +414,10 @@ fn steps(m: &ArgMatches) -> Vec<Step> {
 /// stray.psd --help`): clap reports the mistake first.
 pub(crate) fn parse(args: &[OsString]) -> Result<Cli, clap::Error> {
     let mut cmd = Cli::command().mut_subcommands(|sub| sub.mut_args(blank_env_is_unset));
-    let argv = std::iter::once(OsString::from("photocraft-cli")).chain(args.iter().cloned());
+    let argv = std::iter::once(OsString::from("tsphoto-cli")).chain(args.iter().cloned());
     let matches = match cmd.try_get_matches_from_mut(argv) {
         Err(e) if args.iter().take_while(|a| *a != "--").any(|a| *a == "--help" || *a == "-h") => {
-            let help = [OsString::from("photocraft-cli"), args.first().cloned().unwrap_or_default(), OsString::from("--help")];
+            let help = [OsString::from("tsphoto-cli"), args.first().cloned().unwrap_or_default(), OsString::from("--help")];
             return Err(cmd.try_get_matches_from_mut(help).err().unwrap_or(e));
         }
         matches => matches.map_err(|e| name_env_vars(e, &cmd, args))?,

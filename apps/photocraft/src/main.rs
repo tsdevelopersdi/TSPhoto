@@ -126,7 +126,7 @@ fn integrations(prefs_file: Option<&std::path::Path>) -> photocraft_engine::pref
 /// 1..=65535 is refused the same way.
 fn control_port_for(cli: Option<u16>, prefs: &photocraft_engine::prefs::Integrations) -> (Option<u16>, Option<String>) {
     if !prefs.allow_agent_control {
-        let warning = cli.map(|p| format!("photocraft: Preferences › Integrations › Allow Agent Control is off: not listening on port {p}\n"));
+        let warning = cli.map(|p| format!("tsphoto: Preferences › Integrations › Allow Agent Control is off: not listening on port {p}\n"));
         return (None, warning);
     }
     if let Some(port) = cli {
@@ -136,7 +136,7 @@ fn control_port_for(cli: Option<u16>, prefs: &photocraft_engine::prefs::Integrat
         0 => (None, None),
         p => match u16::try_from(p).ok().filter(|p| *p != 0) {
             Some(port) => (Some(port), None),
-            None => (None, Some(format!("photocraft: Preferences › Integrations › Control Port {p} is not a usable port: not listening\n"))),
+            None => (None, Some(format!("tsphoto: Preferences › Integrations › Control Port {p} is not a usable port: not listening\n"))),
         },
     }
 }
@@ -151,7 +151,7 @@ fn native_options(custom_titlebar: bool) -> eframe::NativeOptions {
     eframe::NativeOptions {
         viewport: viewport
             .with_app_id(APP_ID)
-            .with_title("PhotoCraft")
+            .with_title("TSPhoto")
             .with_inner_size([1440.0, 900.0])
             .with_min_inner_size([760.0, 480.0])
             .with_drag_and_drop(true)
@@ -200,7 +200,7 @@ fn at_least_min_size(mut builder: egui::ViewportBuilder) -> egui::ViewportBuilde
 fn attach_log_file(logger: Option<&'static logging::AppLogger>) {
     if let (Some(logger), Some(dir)) = (logger, services::config_dir()) {
         match logger.attach_dir(&dir.join("logs")) {
-            Ok(path) => log::info!("PhotoCraft {}, log file {}", photocraft_engine::build_info::long_version(), path.display()),
+            Ok(path) => log::info!("TSPhoto {}, log file {}", photocraft_engine::build_info::long_version(), path.display()),
             // Standard error only by now (`attach_dir` gave up on the file); unlike `eprintln!`, never panics.
             Err(e) => log::warn!("no log file: {e}"),
         }
@@ -234,7 +234,7 @@ fn claim_single_instance(
     };
     match (single_instance::skip_reason(&context), services::config_dir()) {
         (Some(reason), _) => {
-            log::info!("running as a separate PhotoCraft: {reason}");
+            log::info!("running as a separate TSPhoto: {reason}");
             Continue(None)
         }
         (None, None) => Continue(None),
@@ -242,12 +242,12 @@ fn claim_single_instance(
             let paths: Vec<String> = files.iter().map(|f| single_instance::absolute(f)).collect();
             match single_instance::claim(&dir, &paths) {
                 single_instance::Launch::Forwarded => {
-                    log::info!("handed {} file(s) to the running PhotoCraft", paths.len());
+                    log::info!("handed {} file(s) to the running TSPhoto", paths.len());
                     Break(())
                 }
                 single_instance::Launch::Primary(primary) => Continue(Some(primary)),
                 single_instance::Launch::Standalone(reason) => {
-                    log::warn!("starting a separate PhotoCraft: {reason}");
+                    log::warn!("starting a separate TSPhoto: {reason}");
                     Continue(None)
                 }
             }
@@ -268,7 +268,7 @@ fn linux_display_session() -> linux_libs::DisplaySession {
         && std::env::var_os("DISPLAY").is_some_and(|d| !d.is_empty())
         && linux_libs::available(linux_libs::DisplaySession::X11)
     {
-        eprintln!("photocraft: opening the window through Xwayland (Preferences › Performance › Linux display server)");
+        eprintln!("tsphoto: opening the window through Xwayland (Preferences › Performance › Linux display server)");
         linux_libs::DisplaySession::X11
     } else {
         session
@@ -296,7 +296,7 @@ fn control_setup(
     let listener = match std::net::TcpListener::bind(("127.0.0.1", port)) {
         Ok(listener) => listener,
         Err(error) => {
-            eprintln!("photocraft: control server failed to bind 127.0.0.1:{port}: {error}");
+            eprintln!("tsphoto: control server failed to bind 127.0.0.1:{port}: {error}");
             std::process::exit(2);
         }
     };
@@ -304,21 +304,21 @@ fn control_setup(
     let token = match photocraft_automation::security::server_token(supplied.as_deref(), token_file.as_deref()) {
         Ok(token) => token,
         Err(e) => {
-            eprintln!("photocraft: cannot configure control authentication: {e}");
+            eprintln!("tsphoto: cannot configure control authentication: {e}");
             std::process::exit(2);
         }
     };
     if let Some(path) = token_file {
-        eprintln!("photocraft: control token file: {}", path.display());
+        eprintln!("tsphoto: control token file: {}", path.display());
     } else if supplied.is_none() {
-        eprintln!("photocraft: control token: {token}");
+        eprintln!("tsphoto: control token: {token}");
     } else {
-        eprintln!("photocraft: using supplied control token");
+        eprintln!("tsphoto: using supplied control token");
     }
     let workspace = match automation.workspace() {
         Ok(workspace) => workspace,
         Err(error) => {
-            eprintln!("photocraft: cannot configure automation workspace: {error}");
+            eprintln!("tsphoto: cannot configure automation workspace: {error}");
             std::process::exit(2);
         }
     };
@@ -349,7 +349,7 @@ fn main() -> eframe::Result {
     #[cfg(not(target_arch = "wasm32"))]
     if let Some(done) = craft_update::self_update::finish(&photocraft_ui_egui::UPDATE_APP, &std::env::args_os().skip(1).collect::<Vec<_>>()) {
         if let Err(e) = done {
-            eprintln!("PhotoCraft update helper failed: {e}");
+            eprintln!("TSPhoto update helper failed: {e}");
             std::process::exit(1);
         }
         return Ok(());
@@ -495,7 +495,7 @@ fn main() -> eframe::Result {
     let created_in_callback = app_created.clone();
     let started_sentinel = sentinel.clone();
     let result = eframe::run_native(
-        "PhotoCraft",
+        "TSPhoto",
         options,
         Box::new(move |cc| {
             created_in_callback.store(true, std::sync::atomic::Ordering::Relaxed);
@@ -740,7 +740,7 @@ fn main() -> eframe::Result {
     // file to attach (#7643). A terminal or automation launch can read standard error or the
     // exit status instead, so it keeps the silent exit.
     if let Err(error) = &result {
-        log::error!("PhotoCraft could not start: {error}");
+        log::error!("TSPhoto could not start: {error}");
         if startup_report::needs_dialog(control_port.is_some()) {
             startup_report::show(&error.to_string(), &started_renderer, started_note.as_deref(), logger.and_then(logging::AppLogger::path).as_deref());
         }

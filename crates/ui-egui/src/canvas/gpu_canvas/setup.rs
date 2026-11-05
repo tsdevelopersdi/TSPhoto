@@ -83,7 +83,7 @@ pub fn use_adapter_limits_with(setup: &mut egui_wgpu::WgpuSetup, on_adapter: imp
 /// `interactive_bench` still call [`device_limits`] directly and so report no GPU time.)
 pub fn device_descriptor(adapter: &wgpu::Adapter) -> wgpu::DeviceDescriptor<'static> {
     wgpu::DeviceDescriptor {
-        label: Some("photocraft wgpu device"),
+        label: Some("tsphoto wgpu device"),
         required_limits: device_limits(adapter),
         required_features: timing_features(adapter),
         ..Default::default()

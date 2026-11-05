@@ -35,7 +35,7 @@ fn extendscript_ext(path: &str) -> Option<&str> {
 
 fn reject_extendscript(cmd: &str, path: &str) -> Result<()> {
     match extendscript_ext(path) {
-        Some(_) => Err(bad(cmd, "PhotoCraft scripts are JSON or command lists (one command.id {json} per line), not Photoshop ExtendScript (.js/.jsx)")),
+        Some(_) => Err(bad(cmd, "TSPhoto scripts are JSON or command lists (one command.id {json} per line), not Photoshop ExtendScript (.js/.jsx)")),
         None => Ok(()),
     }
 }
@@ -354,7 +354,7 @@ fn create_droplet(s: &mut Session, p: &Value) -> Result<Value> {
             options.insert(k.into(), v.clone());
         }
     }
-    let mut droplet = json!({"photocraftDroplet": 1, "name": name, "action": {"name": name, "steps": steps_json}, "options": options});
+    let mut droplet = json!({"tsphotoDroplet": 1, "name": name, "action": {"name": name, "steps": steps_json}, "options": options});
     if !called.is_empty() {
         droplet["calledActions"] = json!(called);
     }
@@ -376,15 +376,15 @@ fn write_shim(droplet: &str) -> Result<String> {
     let quoted_abs = format!("'{}'", abs.replace('\'', "'\\''"));
     let body = format!(
         r#"#!/bin/sh
-# PhotoCraft droplet: runs the action on the files given (or dropped).
-if [ -n "${{PHOTOCRAFT_CLI:-}}" ]; then
-  cli="$PHOTOCRAFT_CLI"
-elif [ -x /Applications/PhotoCraft.app/Contents/MacOS/photocraft-cli ]; then
-  cli=/Applications/PhotoCraft.app/Contents/MacOS/photocraft-cli
-elif [ -x "$HOME/Applications/PhotoCraft.app/Contents/MacOS/photocraft-cli" ]; then
-  cli="$HOME/Applications/PhotoCraft.app/Contents/MacOS/photocraft-cli"
+# TSPhoto droplet: runs the action on the files given (or dropped).
+if [ -n "${{TSPHOTO_CLI:-}}" ]; then
+  cli="$TSPHOTO_CLI"
+elif [ -x /Applications/TSPhoto.app/Contents/MacOS/tsphoto-cli ]; then
+  cli=/Applications/TSPhoto.app/Contents/MacOS/tsphoto-cli
+elif [ -x "$HOME/Applications/TSPhoto.app/Contents/MacOS/tsphoto-cli" ]; then
+  cli="$HOME/Applications/TSPhoto.app/Contents/MacOS/tsphoto-cli"
 else
-  cli=photocraft-cli
+  cli=tsphoto-cli
 fi
 exec "$cli" droplet {quoted_abs} "$@"
 "#
@@ -409,8 +409,8 @@ fn run_droplet(s: &mut Session, p: &Value) -> Result<Value> {
     let cmd = "file.automate.runDroplet";
     let path = p.get("droplet").or_else(|| p.get("path")).and_then(Value::as_str).ok_or_else(|| bad(cmd, "missing \"droplet\""))?;
     let v: Value = serde_json::from_slice(&read_file(path)?).map_err(|e| bad(cmd, format!("{path}: {e}")))?;
-    if v.get("photocraftDroplet").is_none() {
-        return Err(bad(cmd, format!("{path} is not a PhotoCraft droplet")));
+    if v.get("tsphotoDroplet").is_none() && v.get("photocraftDroplet").is_none() {
+        return Err(bad(cmd, format!("{path} is not a TSPhoto droplet")));
     }
     let steps = v.get("action").and_then(|a| a.get("steps")).cloned().ok_or_else(|| bad(cmd, "droplet has no action"))?;
     let opts = v.get("options").cloned().unwrap_or(json!({}));
@@ -597,7 +597,7 @@ pub fn specs() -> Vec<CommandSpec> {
             "file.automate.createDroplet",
             "Create Droplet…",
             &["File", "Automate"],
-            r##"{"path":str (.pcdroplet),"steps":[[id,params]…] (the action),"name":str?,"output":folder?,"format":"same|png|jpg|…"?,"quality":0..12?,"shim":bool=true on Unix (writes <name>.command calling `photocraft-cli droplet`)} → {path, shim} (the actions its Play Action and Conditional steps call are saved in the droplet)"##,
+            r##"{"path":str (.pcdroplet),"steps":[[id,params]…] (the action),"name":str?,"output":folder?,"format":"same|png|jpg|…"?,"quality":0..12?,"shim":bool=true on Unix (writes <name>.command calling `tsphoto-cli droplet`)} → {path, shim} (the actions its Play Action and Conditional steps call are saved in the droplet)"##,
             native,
             create_droplet
         ),

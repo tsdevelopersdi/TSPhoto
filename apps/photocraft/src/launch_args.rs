@@ -21,11 +21,11 @@ use photocraft_automation::args::{AutomationArgs, ControlArgs, blank_env_is_unse
 
 use crate::presentation;
 
-/// Opens PhotoCraft with the given files
+/// Opens TSPhoto with the given files
 #[derive(Parser)]
-#[command(name = "photocraft", version = photocraft_engine::build_info::long_version_static(), after_help = ENVIRONMENT)]
+#[command(name = "tsphoto", version = photocraft_engine::build_info::long_version_static(), after_help = ENVIRONMENT)]
 pub(crate) struct LaunchArgs {
-    /// Files to open. On Windows and Linux they open as new tabs in the PhotoCraft already running.
+    /// Files to open. On Windows and Linux they open as new tabs in the TSPhoto already running.
     /// Put `--` before a name that starts with `-`
     pub(crate) files: Vec<PathBuf>,
     /// Start with the CPU renderer for this launch (after a graphics driver crash)
@@ -35,7 +35,7 @@ pub(crate) struct LaunchArgs {
     /// or off is off; empty is unset)
     #[arg(long, env = "PHOTOCRAFT_IN_WINDOW_MENUS", value_parser = FalseyValueParser::new())]
     pub(crate) in_window_menus: bool,
-    /// Windows and Linux: start a separate PhotoCraft instead of opening the files in the one
+    /// Windows and Linux: start a separate TSPhoto instead of opening the files in the one
     /// already running
     #[arg(long)]
     pub(crate) new_instance: bool,
@@ -65,7 +65,7 @@ pub(crate) struct LaunchArgs {
 
 /// The variables that aren't a flag's fallback, for the end of `--help`.
 const ENVIRONMENT: &str = "\
-Environment: PHOTOCRAFT_NEW_INSTANCE (anything but 0 or empty: as --new-instance), PHOTOCRAFT_CONFIG_DIR (the settings folder)";
+Environment: TSPHOTO_NEW_INSTANCE (anything but 0 or empty: as --new-instance), TSPHOTO_CONFIG_DIR (the settings folder)";
 
 /// An option that applies only to the process it's given to: a launch with any of them keeps its
 /// own process instead of handing its files to the running one (`single_instance`). Shown as the
@@ -164,7 +164,7 @@ pub(crate) fn parse(mut cmd: Command, args: impl IntoIterator<Item = OsString>) 
             !(options && a.to_str().is_some_and(|s| s.starts_with("-psn_")))
         })
         .collect();
-    let argv = std::iter::once(OsString::from("photocraft")).chain(args.iter().cloned());
+    let argv = std::iter::once(OsString::from("tsphoto")).chain(args.iter().cloned());
     let matches = cmd.try_get_matches_from_mut(argv).map_err(|e| name_env_vars(e, &cmd, &args))?;
     let mut launch = LaunchArgs::from_arg_matches(&matches)?;
     // Only the control server reads a token, so a stale exported pair doesn't stop a launch.
@@ -305,7 +305,7 @@ mod tests {
     fn version_stops_parsing() {
         let e = parse_args(&["--version", "--control"]).err().unwrap();
         assert_eq!((e.kind(), e.exit_code()), (ErrorKind::DisplayVersion, 0));
-        assert_eq!(e.to_string(), format!("photocraft {}\n", photocraft_engine::build_info::long_version()));
+        assert_eq!(e.to_string(), format!("tsphoto {}\n", photocraft_engine::build_info::long_version()));
     }
 
     #[test]

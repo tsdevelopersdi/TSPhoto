@@ -20,7 +20,7 @@ use serde_json::{Value, json};
 pub fn start(listener: TcpListener, token: String, ctx: egui::Context) -> Receiver<ControlRequest> {
     let (tx, rx) = channel::<ControlRequest>();
     let port = listener.local_addr().map_or(0, |a| a.port());
-    eprintln!("photocraft: control server listening on {}", listening_addr(&listener, port));
+    eprintln!("tsphoto: control server listening on {}", listening_addr(&listener, port));
     std::thread::spawn(move || {
         let limiter = ConnectionLimiter::new(MAX_CONNECTIONS);
         let token = Arc::new(token);

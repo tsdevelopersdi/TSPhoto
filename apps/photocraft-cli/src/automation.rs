@@ -40,18 +40,18 @@ pub(crate) fn serve(a: &ServeArgs, err: &mut dyn Write) -> Result {
             if a.port_from_env {
                 // Name the mode switch: an exported variable changes what this command does, and
                 // unsetting it (or setting it empty) is the way back to stdio.
-                let _ = writeln!(err, "photocraft-cli: PHOTOCRAFT_CONTROL_PORT={port} is set; serving on TCP instead of stdio (unset it to serve stdio)");
+                let _ = writeln!(err, "tsphoto-cli: TSPHOTO_CONTROL_PORT={port} is set; serving on TCP instead of stdio (unset it to serve stdio)");
             }
             let addr = SocketAddr::from((Ipv4Addr::LOCALHOST, port)).to_string();
             let (supplied, token_file) = (a.control.control_token.as_deref(), a.control.control_token_file.as_deref());
             let token = security::server_token(supplied, token_file)?;
             if let Some(path) = token_file {
-                let _ = writeln!(err, "photocraft-cli control token file: {}", path.display());
+                let _ = writeln!(err, "tsphoto-cli control token file: {}", path.display());
             } else if supplied.is_none() {
-                let _ = writeln!(err, "photocraft-cli control token: {token}");
+                let _ = writeln!(err, "tsphoto-cli control token: {token}");
             }
             photocraft_automation::rpc::serve_tcp(&addr, h, token, |local| {
-                let _ = writeln!(err, "photocraft-cli serving on {local}");
+                let _ = writeln!(err, "tsphoto-cli serving on {local}");
             })?;
             Ok(())
         }
@@ -69,7 +69,7 @@ pub(crate) fn mcp(a: &McpArgs, err: &mut dyn Write) -> Result {
                 // Name the mode switch, as `serve` does: the way back to headless is to unset it.
                 let _ = writeln!(
                     err,
-                    "photocraft-cli: PHOTOCRAFT_CONTROL_PORT is set; bridging to the app on {addr} instead of a headless engine (unset it to run headless)"
+                    "tsphoto-cli: TSPHOTO_CONTROL_PORT is set; bridging to the app on {addr} instead of a headless engine (unset it to run headless)"
                 );
             }
             let token = security::client_token(a.control.control_token.as_deref(), a.control.control_token_file.as_deref())?;

@@ -21,11 +21,11 @@ use crate::{AuthorizedWorkspace, AutomationError};
 #[derive(Args)]
 pub struct ControlArgs {
     /// The control token (64 hex digits)
-    #[arg(long, value_name = "64-HEX", env = "PHOTOCRAFT_CONTROL_TOKEN", hide_env_values = true, value_parser = NonEmptyStringValueParser::new())]
+    #[arg(long, value_name = "64-HEX", env = "TSPHOTO_CONTROL_TOKEN", hide_env_values = true, value_parser = NonEmptyStringValueParser::new())]
     pub control_token: Option<String>,
     /// A file holding the control token, used instead of --control-token (a server creates it
     /// when missing)
-    #[arg(long, value_name = "PATH", env = "PHOTOCRAFT_CONTROL_TOKEN_FILE")]
+    #[arg(long, value_name = "PATH", env = "TSPHOTO_CONTROL_TOKEN_FILE")]
     pub control_token_file: Option<PathBuf>,
 }
 

@@ -277,14 +277,14 @@ pub(crate) fn install_reset_hooks(ctx: &egui::Context) {
     }
     ctx.data_mut(|data| data.insert_temp(installed, true));
     ctx.on_begin_pass(
-        "photocraft type reset UI mode",
+        "tsphoto type reset UI mode",
         Arc::new(|ui| {
             let key = ui_mode_id(ui.ctx().viewport_id());
             ui.ctx().data_mut(|data| data.insert_temp(key, true));
         }),
     );
     ctx.on_end_pass(
-        "photocraft type reset UI mode end",
+        "tsphoto type reset UI mode end",
         Arc::new(|ui| {
             let key = ui_mode_id(ui.ctx().viewport_id());
             ui.ctx().data_mut(|data| data.insert_temp(key, false));

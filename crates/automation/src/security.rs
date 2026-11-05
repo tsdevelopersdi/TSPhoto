@@ -222,7 +222,7 @@ pub fn client_token(supplied: Option<&str>, token_file: Option<&Path>) -> Result
     token_file.map_or_else(
         || {
             Err(AutomationError::BadRequest(
-                "bridge mode needs --control-token, --control-token-file, PHOTOCRAFT_CONTROL_TOKEN, or PHOTOCRAFT_CONTROL_TOKEN_FILE".into(),
+                "bridge mode needs --control-token, --control-token-file, TSPHOTO_CONTROL_TOKEN, or TSPHOTO_CONTROL_TOKEN_FILE".into(),
             ))
         },
         |path| read_token_file(path).map(|v| v.to_ascii_lowercase()),

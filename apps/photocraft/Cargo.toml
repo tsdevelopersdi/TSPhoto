@@ -3,9 +3,13 @@ name = "photocraft"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-default-run = "photocraft"
-description = "PhotoCraft: an open-source, native image editor"
+default-run = "tsphoto"
+description = "TSPhoto desktop app"
 build = "build.rs"
+
+[[bin]]
+name = "tsphoto"
+path = "src/main.rs"
 
 [features]
 # Open HEIC/HEIF photos (the optional photocraft-heif crate). Not default so distributors choose
